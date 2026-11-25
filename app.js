@@ -35,7 +35,6 @@ async function apiGet(action, params = {}) {
         document.body.appendChild(script);
     });
 }
-
 async function apiPost(action, payload = {}) {
     try {
         const res = await fetch(API_URL, {
