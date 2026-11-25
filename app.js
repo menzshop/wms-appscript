@@ -1,5 +1,5 @@
 // GANTI dengan URL web app apps script kanha setelah deploy
-const API_URL = 'https://script.google.com/macros/s/AKfycbyscMp4mdFMIK7dt8WpxvcTr0H76u4y9cr0G0c24kv2UU-Ii2pS-x28b0dfqLc9xrOu2g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbzbBpWSyrkG6ZDmilJen8h-7RpW8n7toxeolXdvTOeVTw4czcI8M4oGI75hgChHutU7RQ/exec';
 
 // LOGIN
 const loginForm = document.getElementById('loginForm');
