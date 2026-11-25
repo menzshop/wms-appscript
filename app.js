@@ -13,9 +13,13 @@ function getUser() { return JSON.parse(localStorage.getItem('wms_user') || '{}')
 async function apiGet(action, params = {}) {
     const qs = new URLSearchParams({ action, token: getToken(), ...params });
     try {
-        const res = await fetch(`${API_URL}?${qs}`);
-        if (res.status === 401) { localStorage.clear(); window.location.href = 'index.html'; return null; }
-        return await res.json();
+        const res = await fetch(`${API_URL}?${qs}`, {
+            method: 'GET',
+            redirect: 'follow', // INI KUNCI AGAR TIDAK KENA CORS
+            headers: { 'Accept': 'application/json' }
+        });
+        const text = await res.text();
+        try { return JSON.parse(text); } catch(e) { return null; }
     } catch (e) { return null; }
 }
 
@@ -23,11 +27,12 @@ async function apiPost(action, payload = {}) {
     try {
         const res = await fetch(API_URL, {
             method: 'POST',
+            redirect: 'follow', // INI KUNCI AGAR TIDAK KENA CORS
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action, token: getToken(), ...payload })
         });
-        if (res.status === 401) { localStorage.clear(); window.location.href = 'index.html'; return null; }
-        return await res.json();
+        const text = await res.text();
+        try { return JSON.parse(text); } catch(e) { return null; }
     } catch (e) { return null; }
 }
 
