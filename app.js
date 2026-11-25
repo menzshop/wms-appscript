@@ -10,17 +10,32 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzbBpWSyrkG6ZDmilJen8h-
 function getToken() { return localStorage.getItem('wms_token'); }
 function getUser() { return JSON.parse(localStorage.getItem('wms_user') || '{}'); }
 
+// HELPER GET (MENGGUNAKAN JSONP AGAR TIDAK KENA CORS)
 async function apiGet(action, params = {}) {
-    const qs = new URLSearchParams({ action, token: getToken(), ...params });
-    try {
-        const res = await fetch(`${API_URL}?${qs}`, {
-            method: 'GET',
-            redirect: 'follow', // INI KUNCI AGAR TIDAK KENA CORS
-            headers: { 'Accept': 'application/json' }
-        });
-        const text = await res.text();
-        try { return JSON.parse(text); } catch(e) { return null; }
-    } catch (e) { return null; }
+    return new Promise((resolve) => {
+        const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+        const qs = new URLSearchParams({ action, token: getToken(), ...params, callback: callbackName });
+        
+        // Buat script element
+        const script = document.createElement('script');
+        script.src = `${API_URL}?${qs.toString()}`;
+        
+        // Fungsi yang dipanggil oleh Apps Script saat merespons
+        window[callbackName] = function(data) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            resolve(data);
+        };
+
+        // Handle error jika script gagal dimuat
+        script.onerror = function() {
+            delete window[callbackName];
+            if(script.parentNode) document.body.removeChild(script);
+            resolve({ success: false, message: 'Gagal terhubung ke server' });
+        };
+
+        document.body.appendChild(script);
+    });
 }
 
 async function apiPost(action, payload = {}) {
