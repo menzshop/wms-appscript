@@ -64,28 +64,20 @@ if (loginForm) {
         const btnLogin = document.getElementById('btnLogin');
 
         btnLogin.disabled = true; btnLogin.textContent = 'MEMPROSES...';
-        try {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: 'login', username, password })
-            });
-            const data = await res.json();
-            if (data.success) {
-                localStorage.setItem('wms_token', data.token);
-                localStorage.setItem('wms_user', JSON.stringify(data.user));
-                window.location.href = 'dashboard.html';
-            } else {
-                errorMsg.textContent = String(data.message || '').toUpperCase();
-                btnLogin.disabled = false; btnLogin.textContent = 'LOGIN';
-            }
-        } catch (err) {
-            errorMsg.textContent = 'SERVER MATI / TIDAK TERHUBUNG';
+        
+        // Kita pakai apiGet agar lolos dari blokir CORS
+        const data = await apiGet('login', { username, password });
+        
+        if (data && data.success) {
+            localStorage.setItem('wms_token', data.token);
+            localStorage.setItem('wms_user', JSON.stringify(data.user));
+            window.location.href = 'dashboard.html';
+        } else {
+            errorMsg.textContent = String((data && data.message) || 'SERVER MATI / TIDAK TERHUBUNG').toUpperCase();
             btnLogin.disabled = false; btnLogin.textContent = 'LOGIN';
         }
     });
 }
-
 // ==========================================
 // DASHBOARD INIT
 // ==========================================
