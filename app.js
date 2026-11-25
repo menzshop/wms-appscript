@@ -14,20 +14,18 @@ function getUser() { return JSON.parse(localStorage.getItem('wms_user') || '{}')
 async function apiGet(action, params = {}) {
     return new Promise((resolve) => {
         const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-        const qs = new URLSearchParams({ action, token: getToken(), ...params, callback: callbackName });
+        // Tambahkan token || '' agar tidak error saat login (token belum ada)
+        const qs = new URLSearchParams({ action, token: getToken() || '', ...params, callback: callbackName });
         
-        // Buat script element
         const script = document.createElement('script');
         script.src = `${API_URL}?${qs.toString()}`;
         
-        // Fungsi yang dipanggil oleh Apps Script saat merespons
         window[callbackName] = function(data) {
             delete window[callbackName];
             document.body.removeChild(script);
             resolve(data);
         };
 
-        // Handle error jika script gagal dimuat
         script.onerror = function() {
             delete window[callbackName];
             if(script.parentNode) document.body.removeChild(script);
